@@ -259,7 +259,7 @@ researchradar/
 
 ---
 
-## Screenshots
+## Key Pages
 
 > Run the application locally (`flask run`) and navigate to `http://127.0.0.1:5000` to see the live UI.
 
@@ -270,12 +270,31 @@ Key pages to explore:
 - **Researcher profile** — authored papers, co-authors, research topics, and 3-hop recommended reading
 
 ---
+## Screenshots
+
+### Home
+![Home](screenshots/home.png)
+
+### Search
+![Search](screenshots/search.png)
+
+### Topic Search
+![Topic Search](screenshots/topic-search.png)
+
+### Researcher Profile
+![Researcher Profile](screenshots/researcher.png)
+
+### Paper Details
+![Paper Details](screenshots/paper-detail.png)
+
+### No Results
+![No Results](screenshots/no-results.png)
 
 ## Hosted Demo
 
-> *(Add your deployment URL here if hosting on Render, Railway, or Fly.io)*
+[Open ResearchRadar](https://researchradar-3ac1.onrender.com)
 
----
+The application is deployed on Render and connected to the CognoDB graph database.
 
 ## Dependencies
 

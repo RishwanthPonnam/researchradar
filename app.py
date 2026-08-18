@@ -311,5 +311,17 @@ def service_unavailable(e):
     return render_template("error.html", context=""), 503
 
 
+@app.route("/db-test")
+def db_test():
+    try:
+        with db.get_session() as session:
+            session.run("RETURN 1").single()
+
+        return "DATABASE CONNECTION SUCCESS ✅"
+
+    except Exception as e:
+        return f"DATABASE CONNECTION FAILED ❌<br><br>{type(e).__name__}: {e}", 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)

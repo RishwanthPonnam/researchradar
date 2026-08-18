@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ResearchRadar{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Explore the research knowledge graph — discover papers, researchers, and topics and how they connect.{% endblock %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <header class="nav" role="banner">
+    <div class="container">
+      <nav class="nav__inner" aria-label="Main navigation">
+
+        <a href="/" class="nav__brand" aria-label="ResearchRadar home">
+          <svg class="nav__brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+            <path d="M5.636 5.636l2.122 2.122M16.243 16.243l2.121 2.121M5.636 18.364l2.122-2.122M16.243 7.757l2.121-2.121"/>
+          </svg>
+          <span>ResearchRadar</span>
+        </a>
+
+        <div class="nav__links">
+          <a href="/search?q=paper" class="nav__link {% if request.endpoint == 'search' and request.args.get('q') == 'paper' %}active{% endif %}">Research</a>
+          <a href="/search?q=smith" class="nav__link">Researchers</a>
+          <a href="/search?q=Artificial" class="nav__link">Topics</a>
+        </div>
+
+        <form class="nav__search-form" action="/search" method="GET" role="search">
+          <input
+            id="nav-search"
+            class="nav__search-input"
+            type="search"
+            name="q"
+            placeholder="Search..."
+            autocomplete="off"
+            aria-label="Quick search"
+            value="{{ request.args.get('q', '') if request.endpoint == 'search' else '' }}"
+          >
+          <button class="nav__search-btn" type="submit">Search</button>
+        </form>
+
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-enter" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

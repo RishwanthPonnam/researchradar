@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Search: "{{ query }}" — ResearchRadar{% endblock %}
+{% block meta_description %}Search results for "{{ query }}" in the ResearchRadar knowledge graph.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <header class="search-page-header">
+    <h1 class="search-page-title">
+      {% if query %}Results for &ldquo;{{ query }}&rdquo;{% else %}Search Results{% endif %}
+    </h1>
+    {% if results %}
+    <p class="search-page-meta">{{ results|length }} result{{ 's' if results|length != 1 }} found</p>
+    {% endif %}
+  </header>
+
+  {% if error %}
+  <div class="error-banner" role="alert">{{ error }}</div>
+  {% endif %}
+
+  {% if results %}
+
+    <div class="results-list" role="list">
+    {% for result in results %}
+
+      {% if result.type == "Researcher" %}
+      <article class="result-item" role="listitem">
+        <div>
+          <div class="result-item__type"><span class="tag tag--researcher">Researcher</span></div>
+          <div class="result-item__title">{{ result.data.name }}</div>
+          <div class="result-item__sub">{{ result.data.affiliation }}</div>
+        </div>
+        <div class="result-item__action">
+          <a href="/researcher/{{ result.data.name }}" class="btn btn--ghost" id="res-explore-{{ loop.index }}">View profile &rarr;</a>
+        </div>
+      </article>
+
+      {% elif result.type == "Paper" %}
+      <article class="result-item" role="listitem">
+        <div>
+          <div class="result-item__type">
+            <span class="tag tag--paper">Paper</span>
+            <span style="font-size:0.75rem; color:var(--faint); margin-left:0.5rem;">{{ result.data.year }}</span>
+          </div>
+          <div class="result-item__title">{{ result.data.title }}</div>
+          {% if result.data.abstract %}
+          <div class="result-item__desc">{{ result.data.abstract[:140] }}{% if result.data.abstract|length > 140 %}...{% endif %}</div>
+          {% endif %}
+        </div>
+        <div class="result-item__action">
+          <a href="/paper/{{ result.data.title }}" class="btn btn--ghost" id="paper-explore-{{ loop.index }}">Read paper &rarr;</a>
+        </div>
+      </article>
+
+      {% elif result.type == "Topic" %}
+      <article class="result-item" role="listitem">
+        <div>
+          <div class="result-item__type"><span class="tag tag--topic">Topic</span></div>
+          <div class="result-item__title">{{ result.data.name }}</div>
+          <div class="result-item__sub">Research area</div>
+        </div>
+        <div class="result-item__action">
+          <a href="/search?q={{ result.data.name }}" class="btn btn--ghost" id="topic-explore-{{ loop.index }}">Explore &rarr;</a>
+        </div>
+      </article>
+      {% endif %}
+
+    {% endfor %}
+    </div>
+
+  {% else %}
+
+    <div class="empty-state" role="status">
+      <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        <path d="M11 8v6M8 11h6" stroke-width="1.5"/>
+      </svg>
+      <h2 class="empty-state__title">No results found</h2>
+      <p class="empty-state__desc">
+        {% if query %}Nothing matched &ldquo;{{ query }}&rdquo;. Try a different keyword.{% else %}Enter a search term to explore the graph.{% endif %}
+      </p>
+      <a href="/" class="btn btn--ghost">Back to home</a>
+    </div>
+
+  {% endif %}
+
+</div>
+{% endblock %}

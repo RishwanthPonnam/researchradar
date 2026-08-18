@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}{{ researcher.name }} — ResearchRadar{% endblock %}
+{% block meta_description %}View the profile, papers, and co-authors of {{ researcher.name }} on ResearchRadar.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  {# ── Page header ─────────────────────────────────────────────── #}
+  <header class="detail-page-header">
+    <div class="detail-page-header__back">
+      <a href="javascript:history.back()" class="btn btn--back" id="back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back
+      </a>
+    </div>
+
+    <div class="detail-page-header__type">
+      <span class="tag tag--researcher">Researcher</span>
+    </div>
+
+    <h1 class="detail-page-header__title">{{ researcher.name }}</h1>
+
+    <div class="detail-page-header__meta">
+      <span class="detail-page-header__meta-item">
+        <strong>Institution</strong> {{ researcher.affiliation }}
+      </span>
+      <span class="detail-page-header__meta-item">
+        <strong>Papers</strong> {{ papers|length }}
+      </span>
+      <span class="detail-page-header__meta-item">
+        <strong>Co-authors</strong> {{ coauthors|length }}
+      </span>
+    </div>
+  </header>
+
+  {# ── Two-column layout ───────────────────────────────────────── #}
+  <div class="detail-layout">
+
+    {# Main column #}
+    <div>
+
+      {# Published Papers #}
+      <section class="content-section" aria-labelledby="papers-title">
+        <h2 class="content-section__title" id="papers-title">Published Papers ({{ papers|length }})</h2>
+        {% if papers %}
+        <div class="paper-list">
+          {% for paper in papers %}
+          <a href="/paper/{{ paper.title }}" class="paper-list-item" id="paper-{{ loop.index }}" style="display:block;">
+            <div class="paper-list-item__year">{{ paper.year }}</div>
+            <div class="paper-list-item__title">{{ paper.title }}</div>
+            {% if paper.abstract %}
+            <div class="paper-list-item__abstract">{{ paper.abstract }}</div>
+            {% endif %}
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <svg class="empty-state__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <h3 class="empty-state__title">No papers found</h3>
+          <p class="empty-state__desc">No publications are on record for this researcher yet.</p>
+        </div>
+        {% endif %}
+      </section>
+
+      {# Recommended Papers — 3-HOP graph traversal #}
+      {% if recommended %}
+      <section class="content-section" aria-labelledby="recommended-title">
+        <h2 class="content-section__title" id="recommended-title">Recommended Reading</h2>
+        <p style="font-size:0.8rem;color:var(--faint);margin-bottom:1rem;">
+          3-hop graph traversal &mdash;
+          papers published by {{ researcher.name }}&rsquo;s collaborators that they have not yet co-authored:<br>
+          <code style="font-family:monospace;color:var(--accent);">
+            (:Researcher)-[:AUTHORED]&rarr;(:Paper)&larr;[:AUTHORED]-(:co-Researcher)-[:AUTHORED]&rarr;(:Paper)
+          </code>
+        </p>
+        <div class="paper-list">
+          {% for rp in recommended %}
+          <a href="/paper/{{ rp.title }}" class="paper-list-item" id="rec-paper-{{ loop.index }}" style="display:block;">
+            <div class="paper-list-item__year">{{ rp.year }}</div>
+            <div class="paper-list-item__title">{{ rp.title }}</div>
+            <div style="font-size:0.75rem;color:var(--faint);margin-top:0.2rem;">
+              Via: {{ rp.via_authors | join(', ') }}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+    </div>
+
+    {# Sidebar #}
+    <aside>
+
+      {# Research Topics — from 2-hop Researcher→Paper→Topic #}
+      <div class="sidebar-section">
+        <h2 class="sidebar-section__title">Research Topics</h2>
+        {% if topics %}
+        <div class="tag-group">
+          {% for topic in topics %}
+          <a href="/search?q={{ topic }}" class="topic-pill" id="topic-{{ loop.index }}">{{ topic }}</a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size:0.8125rem;color:var(--faint);">No topics available.</p>
+        {% endif %}
+      </div>
+
+      {# Co-Authors — from 2-hop Researcher→Paper←Researcher #}
+      <div class="sidebar-section">
+        <h2 class="sidebar-section__title">Co-Authors ({{ coauthors|length }})</h2>
+        {% if coauthors %}
+        <div class="person-list">
+          {% for co in coauthors %}
+          <a href="/researcher/{{ co.name }}" class="person-card" id="coauthor-{{ loop.index }}" style="display:block;">
+            <div class="person-card__name">{{ co.name }}</div>
+            <div class="person-card__institution">{{ co.affiliation }}</div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:2rem 1rem;">
+          <p class="empty-state__desc" style="margin:0;">No co-authors found in the graph.</p>
+        </div>
+        {% endif %}
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>
+{% endblock %}

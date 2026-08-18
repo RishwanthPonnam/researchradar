@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Service Unavailable — ResearchRadar{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="not-found" role="main">
+    <div class="not-found__code" aria-hidden="true" style="font-size:3rem;">503</div>
+    <h1 class="not-found__title">Database unavailable</h1>
+    <p class="not-found__desc">
+      ResearchRadar could not connect to the CognoDB graph database.
+      {% if context %}This affected the <strong>{{ context }}</strong>.{% endif %}
+      Please check your connection settings and try again.
+    </p>
+    <a href="/" class="btn btn--ghost" id="error-home-btn">Back to home</a>
+  </div>
+</div>
+{% endblock %}

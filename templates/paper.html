@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}{{ paper.title }} — ResearchRadar{% endblock %}
+{% block meta_description %}Read the abstract, authors, and research connections for "{{ paper.title }}" on ResearchRadar.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  {# ── Page header ─────────────────────────────────────────────── #}
+  <header class="detail-page-header">
+    <div class="detail-page-header__back">
+      <a href="javascript:history.back()" class="btn btn--back" id="back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back to Research
+      </a>
+    </div>
+
+    <div class="detail-page-header__type">
+      <span class="tag tag--paper">Paper</span>
+    </div>
+
+    <h1 class="detail-page-header__title">{{ paper.title }}</h1>
+
+    <div class="detail-page-header__meta">
+      <span class="detail-page-header__meta-item">
+        <strong>Published</strong> {{ paper.year }}
+      </span>
+      {% if authors %}
+      <span class="detail-page-header__meta-item">
+        <strong>Authors</strong>
+        {% for author in authors %}
+          <a href="/researcher/{{ author.name }}" style="color:var(--res-color); text-decoration:none; transition:opacity 0.15s;" onmouseover="this.style.opacity='0.75'" onmouseout="this.style.opacity='1'">{{ author.name }}</a>{% if not loop.last %}, {% endif %}
+        {% endfor %}
+      </span>
+      {% endif %}
+    </div>
+  </header>
+
+  {# ── Two-column layout ───────────────────────────────────────── #}
+  <div class="detail-layout">
+
+    {# Main column #}
+    <div>
+
+      {# Abstract #}
+      <section class="content-section" aria-labelledby="abstract-title">
+        <h2 class="content-section__title" id="abstract-title">Abstract</h2>
+        <p class="content-section__text">{{ paper.abstract }}</p>
+      </section>
+
+      {# Research Topics — primary + secondary #}
+      <section class="content-section" aria-labelledby="topics-title">
+        <h2 class="content-section__title" id="topics-title">Research Topics</h2>
+        {% if primary_topics or secondary_topics %}
+          {% if primary_topics %}
+          <div style="margin-bottom:0.75rem;">
+            <span style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:0.4rem;">Primary</span>
+            <div class="tag-group">
+              {% for topic in primary_topics %}
+              <a href="/search?q={{ topic.name }}" class="topic-pill" id="primary-topic-{{ loop.index }}">{{ topic.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+          {% if secondary_topics %}
+          <div>
+            <span style="font-size:0.7rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--faint);display:block;margin-bottom:0.4rem;">Secondary</span>
+            <div class="tag-group">
+              {% for topic in secondary_topics %}
+              <a href="/search?q={{ topic.name }}" class="topic-pill" id="secondary-topic-{{ loop.index }}" style="opacity:0.75;">{{ topic.name }}</a>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        {% else %}
+        <p style="font-size:0.875rem; color:var(--faint);">No topics associated with this paper.</p>
+        {% endif %}
+      </section>
+
+      {# Research Connections — visual 2-hop flow #}
+      <section class="connections-section content-section" aria-labelledby="connections-title">
+        <h2 class="content-section__title" id="connections-title">Research Connections</h2>
+        <p style="font-size:0.8rem;color:var(--faint);margin-bottom:1rem;">
+          2-hop graph traversal: Paper &rarr; Topics &larr; Researchers
+        </p>
+        <div class="connection-flow" role="list">
+
+          <div class="connection-node" role="listitem">
+            <span class="connection-node__dot connection-node__dot--current"></span>
+            <span class="connection-node__label">This Paper</span>
+            <div class="connection-node__values">
+              <span class="connection-node__pill">{{ paper.title }}</span>
+            </div>
+          </div>
+
+          <div class="connection-node__arrow" aria-hidden="true"></div>
+
+          <div class="connection-node" role="listitem">
+            <span class="connection-node__dot connection-node__dot--topic"></span>
+            <span class="connection-node__label">Topics</span>
+            <div class="connection-node__values">
+              {% for topic in topics %}
+              <span class="connection-node__pill">{{ topic.name }}</span>
+              {% else %}
+              <span style="font-size:0.75rem;color:var(--faint);">None</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="connection-node__arrow" aria-hidden="true"></div>
+
+          <div class="connection-node" role="listitem">
+            <span class="connection-node__dot connection-node__dot--researcher"></span>
+            <span class="connection-node__label">Researchers</span>
+            <div class="connection-node__values">
+              {% for author in authors %}
+              <a href="/researcher/{{ author.name }}" class="connection-node__pill" style="text-decoration:none;color:var(--res-color);">{{ author.name }}</a>
+              {% else %}
+              <span style="font-size:0.75rem;color:var(--faint);">None</span>
+              {% endfor %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Related Papers — 2-hop: Paper → Topic ← Paper #}
+      {% if related_papers %}
+      <section class="content-section" aria-labelledby="related-title">
+        <h2 class="content-section__title" id="related-title">Related Papers</h2>
+        <p style="font-size:0.8rem;color:var(--faint);margin-bottom:1rem;">
+          Found via shared research topics &mdash; graph traversal:
+          <code style="font-family:monospace;color:var(--accent);">(:Paper)-[:ABOUT]&rarr;(:Topic)&larr;[:ABOUT]-(:Paper)</code>
+        </p>
+        <div class="paper-list">
+          {% for rp in related_papers %}
+          <a href="/paper/{{ rp.title }}" class="paper-list-item" id="related-paper-{{ loop.index }}" style="display:block;">
+            <div class="paper-list-item__year">{{ rp.year }}</div>
+            <div class="paper-list-item__title">{{ rp.title }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.35rem;">
+              {% for st in rp.shared_topics %}
+              <span class="topic-pill" style="font-size:0.7rem;padding:0.1rem 0.4rem;">{{ st }}</span>
+              {% endfor %}
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+    </div>
+
+    {# Sidebar #}
+    <aside>
+
+      {# Authors — ordered by contribution #}
+      <div class="sidebar-section">
+        <h2 class="sidebar-section__title">Authors</h2>
+        {% if authors %}
+        <div class="person-list">
+          {% for author in authors %}
+          <a href="/researcher/{{ author.name }}" class="person-card" id="author-{{ loop.index }}" style="display:block;">
+            <div class="person-card__name">{{ author.name }}</div>
+            <div class="person-card__institution">{{ author.affiliation }}</div>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:2rem 1rem;">
+          <p class="empty-state__desc" style="margin:0;">No authors on record.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      {# Institutions — deduplicated #}
+      {% if authors %}
+      <div class="sidebar-section">
+        <h2 class="sidebar-section__title">Institutions</h2>
+        <div style="display:flex;flex-direction:column;gap:0.375rem;">
+          {% set institutions = [] %}
+          {% for author in authors %}
+            {% if author.affiliation and author.affiliation not in institutions %}
+              {{ institutions.append(author.affiliation) or '' }}
+              <span style="font-size:0.8125rem;color:var(--muted);">{{ author.affiliation }}</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# Related Research — topic links #}
+      <div class="sidebar-section">
+        <h2 class="sidebar-section__title">Explore by Topic</h2>
+        {% if topics %}
+        <div style="display:flex;flex-direction:column;gap:0.5rem;">
+          {% for topic in topics %}
+          <a href="/search?q={{ topic.name }}" class="btn btn--ghost" id="related-topic-{{ loop.index }}" style="justify-content:space-between;">
+            <span>{{ topic.name }}</span>
+            <span>&rarr;</span>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="font-size:0.8125rem;color:var(--faint);">No related research found.</p>
+        {% endif %}
+      </div>
+
+    </aside>
+
+  </div>
+
+</div>
+{% endblock %}

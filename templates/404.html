@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found — ResearchRadar{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="not-found" role="main">
+    <div class="not-found__code" aria-hidden="true">404</div>
+    <h1 class="not-found__title">Page not found</h1>
+    <p class="not-found__desc">The researcher, paper, or topic you're looking for doesn't exist in the graph.</p>
+    <a href="/" class="btn btn--ghost" id="back-home-btn">Back to ResearchRadar</a>
+  </div>
+</div>
+{% endblock %}
